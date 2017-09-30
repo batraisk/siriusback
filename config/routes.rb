@@ -1,9 +1,9 @@
 Rails.application.routes.draw do
 	scope :api do
-		resource :authorizations do
+		resource :users do
 			get :signin
-			get :signup
+			get :authenticate
+			post :new
 		end
-	 get 'signup',  :to => "users#new"
 	end
 end
