@@ -27,26 +27,48 @@ class User < ApplicationRecord
   	encrypted_password == encrypt(submitted_password)
   end
 
-  def self.authenticate(email, submitted_password)
-  	auth_user = self.find_by_email(email)
-    if auth_user.present? && auth_user.has_password?(submitted_password)
+  def self.auth_by_token?(email, token)
+    auth_user = self.find_by_email(email)
+    if auth_user.present? && auth_user.encrypted_password.eql?(token)
       true
     else
       false
     end
 #     return user if auth_user.has_password?(submitted_password)
   end
+
+  def self.auth_by_password?(email, password)
+    auth_user = self.find_by_email(email)
+    if auth_user.present? && auth_user.has_password?(password)
+      true
+    else
+      false
+    end
+#     return user if auth_user.has_password?(submitted_password)
+  end
+
+  def self.authenticate(email, token)
+  	auth_user = self.find_by_email(email)
+    if auth_user.present? && auth_user.encrypted_password.eql?(token)
+      auth_user
+    else
+      nil
+    end
+#     return user if auth_user.has_password?(submitted_password)
+  end
  
+
   private
- 
+
+  def encrypt(string) 
+    secure_hash("#{salt}--#{string}") 
+  end 
+
   def encrypt_password 
     self.salt = make_salt if new_record? 
     self.encrypted_password = encrypt(password) 
   end 
 
-  def encrypt(string) 
-    secure_hash("#{salt}--#{string}") 
-  end 
 
   def make_salt 
     secure_hash("#{Time.now.utc}--#{password}") 
